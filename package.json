@@ -1,0 +1,66 @@
+{
+  "name": "agent-speech-opencode",
+  "version": "0.1.0",
+  "description": "OpenCode text-to-speech plugin using macOS native say command",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "agent-speech": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./mcp": {
+      "import": "./dist/mcp-server.js",
+      "types": "./dist/mcp-server.d.ts"
+    },
+    "./plugin": {
+      "import": "./dist/opencode-plugin.js",
+      "types": "./dist/opencode-plugin.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "tts",
+    "text-to-speech",
+    "opencode",
+    "opencode-plugin",
+    "macos",
+    "say",
+    "accessibility"
+  ],
+  "author": "welico",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^4.3.6"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ]
+}
