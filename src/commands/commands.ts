@@ -1,0 +1,145 @@
+import { ConfigManager } from '../core/config.js';
+import { formatSuccess, formatError } from '../utils/format.js';
+
+export async function cmdInit(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  await config.save();
+  formatSuccess('Configuration initialized at ~/.agent-speech/config.json');
+  return 0;
+}
+
+export async function cmdEnable(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  config.set('enabled', true);
+  await config.save();
+  formatSuccess('TTS enabled');
+  return 0;
+}
+
+export async function cmdDisable(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  config.set('enabled', false);
+  await config.save();
+  formatSuccess('TTS disabled');
+  return 0;
+}
+
+export async function cmdToggle(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  const current = config.get('enabled');
+  config.set('enabled', !current);
+  await config.save();
+  formatSuccess(`TTS ${!current ? 'enabled' : 'disabled'}`);
+  return 0;
+}
+
+export async function cmdStatus(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  const cfg = config.getAll();
+
+  console.log('Agent Speech Status');
+  console.log(`├─ Enabled: ${cfg.enabled}`);
+  console.log(`├─ Voice: ${cfg.voice}`);
+  console.log(`├─ Rate: ${cfg.rate} WPM`);
+  console.log(`├─ Volume: ${cfg.volume}`);
+  console.log(`├─ Min Length: ${cfg.minLength}`);
+  console.log(`└─ Max Length: ${cfg.maxLength === 0 ? 'unlimited' : cfg.maxLength}`);
+  return 0;
+}
+
+export async function cmdReset(): Promise<number> {
+  const config = new ConfigManager();
+  await config.init();
+  config.reset();
+  await config.save();
+  formatSuccess('Configuration reset to defaults');
+  return 0;
+}
+
+export async function cmdSetVoice(voice: string | undefined): Promise<number> {
+  if (!voice) {
+    formatError('Voice name required. Example: agent-speech set-voice Samantha');
+    return 1;
+  }
+  const config = new ConfigManager();
+  await config.init();
+  config.set('voice', voice);
+  await config.save();
+  formatSuccess(`Voice set to "${voice}"`);
+  return 0;
+}
+
+export async function cmdSetRate(rateArg: string | undefined): Promise<number> {
+  if (!rateArg) {
+    formatError('Rate required. Example: agent-speech set-rate 200');
+    return 1;
+  }
+  const rate = parseInt(rateArg, 10);
+  if (isNaN(rate) || rate < 50 || rate > 400) {
+    formatError('Rate must be a number between 50 and 400');
+    return 1;
+  }
+  const config = new ConfigManager();
+  await config.init();
+  config.set('rate', rate);
+  await config.save();
+  formatSuccess(`Rate set to ${rate} WPM`);
+  return 0;
+}
+
+export async function cmdSetVolume(volumeArg: string | undefined): Promise<number> {
+  if (!volumeArg) {
+    formatError('Volume required. Example: agent-speech set-volume 50');
+    return 1;
+  }
+  const volume = parseInt(volumeArg, 10);
+  if (isNaN(volume) || volume < 0 || volume > 100) {
+    formatError('Volume must be a number between 0 and 100');
+    return 1;
+  }
+  const config = new ConfigManager();
+  await config.init();
+  config.set('volume', volume);
+  await config.save();
+  formatSuccess(`Volume set to ${volume}`);
+  return 0;
+}
+
+export async function cmdListVoices(): Promise<number> {
+  const { TextToSpeech } = await import('../core/tts.js');
+  const tts = new TextToSpeech();
+  const voices = await tts.getAvailableVoices();
+
+  console.log('Available voices:');
+  for (const v of voices) {
+    console.log(`  - ${v.name} (${v.language})`);
+  }
+  return 0;
+}
+
+export function cmdHelp(): number {
+  console.log(`
+agent-speech — OpenCode TTS plugin CLI
+
+Commands:
+  init              Initialize configuration
+  enable            Enable TTS
+  disable           Disable TTS
+  toggle            Toggle TTS on/off
+  status            Show current settings
+  reset             Reset to defaults
+  set-voice <name>  Set voice (e.g., Samantha, Alex)
+  set-rate <wpm>    Set speech rate (50-400)
+  set-volume <0-100> Set volume
+  list-voices       List available voices
+  help              Show this help
+  `.trim());
+  return 0;
+}
+
+;
