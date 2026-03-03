@@ -23,7 +23,26 @@ It supports two integration modes:
 
 ## Quick Start
 
-### Option A: Plugin mode (automatic speech)
+### Option A: Plugin from npm
+
+Add this to `~/.config/opencode/opencode.json` or project `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["agent-speech-opencode"]
+}
+```
+
+Install:
+
+```bash
+npm install -g agent-speech-opencode
+```
+
+Restart OpenCode. Responses should now be spoken automatically.
+
+### Option B: Local plugin file
 
 Install globally and create a plugin entry file:
 
@@ -42,7 +61,7 @@ export default AgentSpeechPlugin;
 
 Restart OpenCode. Responses should now be spoken automatically.
 
-### Option B: MCP server mode
+### Option C: MCP server mode
 
 Add this to your `opencode.jsonc`:
 
@@ -227,6 +246,14 @@ This package is macOS-only. The `say` command is not available on Linux or Windo
 DEBUG=true LOG_LEVEL=debug node dist/mcp-server.js
 tail -f /tmp/agent-speech-debug.log
 ```
+
+---
+
+## Migration from agent-speech-claude-code
+
+- The plugin now handles `session.idle` through the OpenCode `event` hook model.
+- Session lookup uses OpenCode SDK-style `client.session.messages({ path: { id } })`.
+- npm installation auto-loads through the `plugin` array with `agent-speech-opencode`.
 
 ---
 

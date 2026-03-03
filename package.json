@@ -1,16 +1,16 @@
 {
   "name": "agent-speech-opencode",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OpenCode text-to-speech plugin using macOS native say command",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/opencode-plugin.js",
   "bin": {
     "agent-speech": "./dist/cli.js"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/opencode-plugin.js",
+      "types": "./dist/opencode-plugin.d.ts"
     },
     "./mcp": {
       "import": "./dist/mcp-server.js",
