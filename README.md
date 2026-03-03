@@ -2,6 +2,16 @@
 
 > **Text-to-speech plugin for OpenCode** — reads AI responses using the native macOS `say` command.
 
+[![npm version](https://img.shields.io/npm/v/agent-speech-opencode?color=2f81f7&label=npm)](https://www.npmjs.com/package/agent-speech-opencode)
+[![npm downloads](https://img.shields.io/npm/dm/agent-speech-opencode?color=2ea043&label=downloads)](https://www.npmjs.com/package/agent-speech-opencode)
+[![GitHub release](https://img.shields.io/github/v/release/welico/agent-speech-opencode?color=2f81f7&label=release)](https://github.com/welico/agent-speech-opencode/releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/welico/agent-speech-opencode?color=57606a)](https://github.com/welico/agent-speech-opencode/commits/main)
+[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![platform macOS](https://img.shields.io/badge/platform-macOS-000000?logo=apple&logoColor=white)](https://www.apple.com/macos)
+[![OpenCode Plugin](https://img.shields.io/badge/OpenCode-Plugin-orange)](https://opencode.ai/docs/plugins)
+[![MCP Server](https://img.shields.io/badge/MCP-Server-7c3aed)](https://opencode.ai/docs/mcp-servers)
+[![license MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
 **Platform**: macOS | **Integration**: OpenCode Plugin + MCP Server
 
 For the official OpenCode plugin model and packaging flow, see `docs/opencode-plugin-package-guide.md`.
@@ -22,6 +32,24 @@ It supports two integration modes:
 ---
 
 ## Quick Start
+
+### OpenCode CLI에서 바로 설치 (권장)
+
+```bash
+npm install -g agent-speech-opencode
+mkdir -p ~/.config/opencode
+```
+
+`~/.config/opencode/opencode.json`에 아래를 추가하세요.
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["agent-speech-opencode"]
+}
+```
+
+OpenCode를 재시작하면 다음 응답부터 자동 음성 출력이 시작됩니다.
 
 ### Option A: Plugin from npm
 
@@ -92,6 +120,20 @@ Then trigger it in a prompt, for example: `Say "Hello world"`.
 - Node.js 18+
 - OpenCode
 
+### Install in OpenCode CLI terminal
+
+```bash
+npm install -g agent-speech-opencode
+agent-speech init
+agent-speech status
+```
+
+### Upgrade
+
+```bash
+npm install -g agent-speech-opencode@latest
+```
+
 ### Install from source
 
 ```bash
@@ -145,6 +187,21 @@ Config file location: `~/.agent-speech/config.json`
 ---
 
 ## Usage
+
+### 기본 사용 흐름
+
+1. OpenCode를 실행합니다.
+2. 응답이 완료되면(`session.idle`) 플러그인이 자동으로 마지막 assistant 텍스트를 읽습니다.
+3. 필요하면 `agent-speech set-voice Alex` 등으로 음성/속도를 조정합니다.
+
+### 빠른 점검
+
+```bash
+agent-speech status
+agent-speech list-voices
+agent-speech set-rate 180
+agent-speech set-volume 70
+```
 
 ### Automatic (Plugin mode)
 
