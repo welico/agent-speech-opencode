@@ -21,7 +21,57 @@ const COMMAND_OUTPUT_PATTERNS = [
   /^\s*(BUILD|FAILED|SUCCESS|INFO|DEBUG|WARN|ERROR)\b/gm,
 ];
 
+const SUMMARY_KEYWORDS = [
+  /^(done|completed?|finished|fixed|updated|added|removed|changed|refactored)\b/i,
+  /^(in summary|to summarize|in conclusion|the result|the fix|the change)/i,
+  /^(this (adds?|fixes?|updates?|changes?|removes?|creates?))/i,
+  /^(now |the (file|code|function|class|test|build|type))/i,
+];
+
 export class ContentFilter {
+  summarize(text: string): string {
+    let clean = text.replace(/```[\s\S]*?```/g, '').replace(/`[^`]+`/g, '');
+    clean = clean.replace(/^#{1,6}\s+/gm, '');
+    clean = clean.replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1');
+    clean = clean.replace(/_{1,2}([^_]+)_{1,2}/g, '$1');
+    clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    clean = clean.replace(/^[\s]*[-*+]\s+/gm, '');
+    clean = clean.replace(/^\s*\d+\.\s+/gm, '');
+
+    const paragraphs = clean
+      .split(/\n{2,}/)
+      .map((p) => p.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim())
+      .filter((p) => p.length > 10);
+
+    if (paragraphs.length === 0) return '';
+
+    const conclusion = paragraphs.find((p) =>
+      SUMMARY_KEYWORDS.some((re) => re.test(p)),
+    );
+
+    const candidate = conclusion ?? paragraphs[paragraphs.length - 1];
+
+    return this.trimToSentence(candidate, 200);
+  }
+
+  private trimToSentence(text: string, maxLen: number): string {
+    if (text.length <= maxLen) return text;
+
+    const slice = text.slice(0, maxLen);
+    const lastPunct = Math.max(
+      slice.lastIndexOf('. '),
+      slice.lastIndexOf('! '),
+      slice.lastIndexOf('? '),
+    );
+
+    if (lastPunct > 20) {
+      return slice.slice(0, lastPunct + 1).trim();
+    }
+
+    const lastSpace = slice.lastIndexOf(' ');
+    return (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim() + '…';
+  }
+
   filter(text: string, config: TTSConfig): FilterResult {
     let filteredText = text;
 

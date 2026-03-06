@@ -9,6 +9,7 @@ import {
   cmdSetVoice,
   cmdSetRate,
   cmdSetVolume,
+  cmdSetLanguage,
   cmdListVoices,
   cmdHelp,
 } from './commands/index.js';
@@ -31,6 +32,7 @@ async function main(): Promise<number> {
     case 'set-voice': return cmdSetVoice(rest[0]);
     case 'set-rate': return cmdSetRate(rest[0]);
     case 'set-volume': return cmdSetVolume(rest[0]);
+    case 'set-language': return cmdSetLanguage(rest[0]);
     case 'list-voices': return cmdListVoices();
     case 'help':
     case '--help':

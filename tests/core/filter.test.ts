@@ -121,4 +121,48 @@ describe('ContentFilter', () => {
       expect(result).not.toContain('console.log()');
     });
   });
+
+  describe('summarize()', () => {
+    it('should return short text unchanged', () => {
+      const text = 'Done. The file has been updated.';
+      expect(filter.summarize(text)).toBe(text);
+    });
+
+    it('should strip code blocks', () => {
+      const text = 'Here is a fix:\n\n```ts\nconst x = 1;\n```\n\nFixed the bug.';
+      const result = filter.summarize(text);
+      expect(result).not.toContain('const x');
+      expect(result).toContain('Fixed the bug');
+    });
+
+    it('should prefer conclusion paragraph matching SUMMARY_KEYWORDS', () => {
+      const text = 'Some background info here.\n\nMore details about the implementation.\n\nDone. The refactoring is complete.';
+      const result = filter.summarize(text);
+      expect(result).toContain('Done');
+    });
+
+    it('should fall back to last paragraph when no keyword match', () => {
+      const text = 'First paragraph with some content.\n\nSecond paragraph is here.\n\nThird paragraph at the end.';
+      const result = filter.summarize(text);
+      expect(result).toContain('Third paragraph');
+    });
+
+    it('should trim to 200 characters at a sentence boundary', () => {
+      const long = 'This is sentence one. This is sentence two. ' + 'x'.repeat(200);
+      const result = filter.summarize(long);
+      expect(result.length).toBeLessThanOrEqual(200);
+    });
+
+    it('should strip markdown headings and bold', () => {
+      const text = '## Summary\n\n**Done.** The update is complete.';
+      const result = filter.summarize(text);
+      expect(result).not.toContain('##');
+      expect(result).not.toContain('**');
+    });
+
+    it('should return empty string for code-only text', () => {
+      const text = '```ts\nconst x = 1;\n```';
+      expect(filter.summarize(text)).toBe('');
+    });
+  });
 });

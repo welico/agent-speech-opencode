@@ -10,6 +10,7 @@ const DEFAULT_CONFIG: AppConfig = {
   volume: 50,
   minLength: 10,
   maxLength: 0,
+  language: 'auto',
   filters: {
     sensitive: false,
     skipCodeBlocks: false,
@@ -73,14 +74,15 @@ export class ConfigManager {
   }
 
   validate(): boolean {
-    const { enabled, voice, rate, volume, minLength, maxLength } = this.config;
+    const { enabled, voice, rate, volume, minLength, maxLength, language } = this.config;
     if (
       typeof enabled !== 'boolean' ||
       typeof voice !== 'string' ||
       typeof rate !== 'number' ||
       typeof volume !== 'number' ||
       typeof minLength !== 'number' ||
-      typeof maxLength !== 'number'
+      typeof maxLength !== 'number' ||
+      typeof language !== 'string'
     ) return false;
 
     if (rate < 50 || rate > 400) return false;

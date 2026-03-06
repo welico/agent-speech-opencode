@@ -1,6 +1,19 @@
 import { ConfigManager } from '../core/config.js';
 import { formatSuccess, formatError } from '../utils/format.js';
 
+const SUPPORTED_LANGUAGES = new Set([
+  'auto',
+  'en',
+  'ko',
+  'ja',
+  'zh-CN',
+  'es',
+  'fr',
+  'de',
+  'it',
+  'ru',
+]);
+
 export async function cmdInit(): Promise<number> {
   const config = new ConfigManager();
   await config.init();
@@ -48,7 +61,8 @@ export async function cmdStatus(): Promise<number> {
   console.log(`├─ Rate: ${cfg.rate} WPM`);
   console.log(`├─ Volume: ${cfg.volume}`);
   console.log(`├─ Min Length: ${cfg.minLength}`);
-  console.log(`└─ Max Length: ${cfg.maxLength === 0 ? 'unlimited' : cfg.maxLength}`);
+  console.log(`├─ Max Length: ${cfg.maxLength === 0 ? 'unlimited' : cfg.maxLength}`);
+  console.log(`└─ Language: ${cfg.language}`);
   return 0;
 }
 
@@ -110,6 +124,26 @@ export async function cmdSetVolume(volumeArg: string | undefined): Promise<numbe
   return 0;
 }
 
+export async function cmdSetLanguage(languageArg: string | undefined): Promise<number> {
+  if (!languageArg) {
+    formatError('Language required. Example: agent-speech set-language ko');
+    return 1;
+  }
+
+  const language = languageArg.trim();
+  if (!SUPPORTED_LANGUAGES.has(language)) {
+    formatError('Supported languages: auto, en, ko, ja, zh-CN, es, fr, de, it, ru');
+    return 1;
+  }
+
+  const config = new ConfigManager();
+  await config.init();
+  config.set('language', language);
+  await config.save();
+  formatSuccess(`Language set to ${language}`);
+  return 0;
+}
+
 export async function cmdListVoices(): Promise<number> {
   const { TextToSpeech } = await import('../core/tts.js');
   const tts = new TextToSpeech();
@@ -136,6 +170,7 @@ Commands:
   set-voice <name>  Set voice (e.g., Samantha, Alex)
   set-rate <wpm>    Set speech rate (50-400)
   set-volume <0-100> Set volume
+  set-language <code> Set spoken language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
   list-voices       List available voices
   help              Show this help
   `.trim());

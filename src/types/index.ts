@@ -50,8 +50,7 @@ export interface AppConfig {
   maxLength: number;
   /** Content filtering options */
   filters: FilterConfig;
-  /** Language setting */
-  language?: string;
+  language: string;
 }
 
 /**

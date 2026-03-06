@@ -1,5 +1,7 @@
 import { TextToSpeech } from './core/tts.js';
 import { ConfigManager } from './core/config.js';
+import { ContentFilter } from './core/filter.js';
+import { translateText } from './utils/translate.js';
 import { createLogger } from './utils/logger.js';
 
 const logger = createLogger({ prefix: '[agent-speech]' });
@@ -9,6 +11,29 @@ type SessionMessage = {
   role?: string;
   parts: Array<{ type: string; text?: string }>;
 };
+
+const HANGUL_REGEX = /[\uac00-\ud7af]/;
+const JAPANESE_REGEX = /[\u3040-\u30ff]/;
+const CJK_REGEX = /[\u4e00-\u9fff]/;
+const CYRILLIC_REGEX = /[\u0400-\u04ff]/;
+
+function extractMessageText(message: SessionMessage | undefined): string {
+  if (!message) return '';
+
+  return message.parts
+    .filter((p) => p.type === 'text' && typeof p.text === 'string')
+    .map((p) => p.text as string)
+    .join('\n')
+    .trim();
+}
+
+function detectLanguageFromText(text: string): string {
+  if (HANGUL_REGEX.test(text)) return 'ko';
+  if (JAPANESE_REGEX.test(text)) return 'ja';
+  if (CJK_REGEX.test(text)) return 'zh-CN';
+  if (CYRILLIC_REGEX.test(text)) return 'ru';
+  return 'en';
+}
 
 type OpenCodeClient = {
   session: {
@@ -51,6 +76,7 @@ function extractMessages(result: unknown): SessionMessage[] {
 export const AgentSpeechPlugin = async ({ client }: PluginContext) => {
   const config = new ConfigManager();
   const tts = new TextToSpeech();
+  const filter = new ContentFilter();
 
   await config.init();
   logger.info('agent-speech-opencode plugin initialized');
@@ -73,19 +99,34 @@ export const AgentSpeechPlugin = async ({ client }: PluginContext) => {
           .reverse()
           .find((m) => (m.info?.role ?? m.role) === 'assistant');
 
+        const lastUser = [...messages]
+          .reverse()
+          .find((m) => (m.info?.role ?? m.role) === 'user');
+
         if (!lastAssistant) return;
 
-        const text = lastAssistant.parts
-          .filter((p) => p.type === 'text' && typeof p.text === 'string')
-          .map((p) => p.text as string)
-          .join('\n')
-          .trim();
+        const text = extractMessageText(lastAssistant);
 
         if (!text) return;
 
-        logger.debug('Speaking last assistant message', { length: text.length });
+        const summary = filter.summarize(text);
+        if (!summary) return;
 
-        await tts.speak(text, {
+        const languageFromConfig = cfg.language?.trim();
+        const targetLanguage = languageFromConfig && languageFromConfig !== 'auto'
+          ? languageFromConfig
+          : detectLanguageFromText(extractMessageText(lastUser));
+
+        const spokenText = await translateText(summary, targetLanguage);
+        if (!spokenText) return;
+
+        logger.debug('Speaking summarized assistant message', {
+          original: text.length,
+          summary: summary.length,
+          language: targetLanguage,
+        });
+
+        await tts.speak(spokenText, {
           enabled: cfg.enabled,
           voice: cfg.voice,
           rate: cfg.rate,

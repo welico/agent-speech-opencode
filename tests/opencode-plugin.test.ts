@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mockSpeak = vi.fn().mockResolvedValue(undefined);
 const mockConfigInit = vi.fn().mockResolvedValue(undefined);
@@ -47,7 +47,12 @@ describe('AgentSpeechPlugin', () => {
         skipCodeBlocks: false,
         skipCommands: false,
       },
+      language: 'auto',
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('speaks the latest assistant message on session.idle event', async () => {
@@ -115,5 +120,39 @@ describe('AgentSpeechPlugin', () => {
 
     expect(client.session.messages).not.toHaveBeenCalled();
     expect(mockSpeak).not.toHaveBeenCalled();
+  });
+
+  it('translates summary to detected user language before speaking', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [[['최신 응답', 'latest response', null, null, 15]]],
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const messages = [
+      { info: { role: 'user' }, parts: [{ type: 'text', text: '한국어로 말해줘' }] },
+      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'latest response' }] },
+    ];
+
+    const client = {
+      session: {
+        messages: vi.fn().mockResolvedValue({ data: messages }),
+      },
+    };
+
+    const plugin = await AgentSpeechPlugin({ client });
+    await plugin.event?.({
+      event: {
+        type: 'session.idle',
+        properties: { sessionID: 'session-2' },
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('tl=ko');
+    expect(mockSpeak).toHaveBeenCalledWith(
+      '최신 응답',
+      expect.objectContaining({ voice: 'Samantha', rate: 200, volume: 50 })
+    );
   });
 });

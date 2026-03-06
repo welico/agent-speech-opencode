@@ -8,6 +8,7 @@ export {
   cmdSetVoice,
   cmdSetRate,
   cmdSetVolume,
+  cmdSetLanguage,
   cmdListVoices,
   cmdHelp,
 } from './commands.js';
