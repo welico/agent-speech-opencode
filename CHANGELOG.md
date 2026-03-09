@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.3 - 2026-03-09
+
+- Speak only when assistant output requires a user decision, skipping routine status updates.
+- Add decision-intent extraction patterns for English and Korean prompts in speech filtering.
+- Add and update plugin/filter tests to cover decision-only speech behavior.
+- Add ESLint TypeScript configuration and align lint script with `src/**/*.ts`.
+
 ## v0.2.1 - 2026-03-03
 
 - Expand README installation guide for direct setup inside OpenCode CLI terminal.
