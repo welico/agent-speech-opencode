@@ -164,9 +164,6 @@ function launchAgentPath(): string {
 }
 
 function launchAgentContent(): string {
-  const repoPath = join(homedir(), '.config', 'opencode', 'plugins', 'agent-speech-opencode');
-  const escapedRepoPath = repoPath.replace(/"/g, '\\"');
-
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -177,7 +174,7 @@ function launchAgentContent(): string {
   <array>
     <string>/bin/sh</string>
     <string>-lc</string>
-    <string>if [ -d "${escapedRepoPath}/.git" ]; then git -C "${escapedRepoPath}" pull --ff-only; fi</string>
+    <string>npm install -g agent-speech-opencode@latest</string>
   </array>
   <key>StartInterval</key>
   <integer>86400</integer>
@@ -195,7 +192,7 @@ export async function cmdEnableAutoUpdate(): Promise<number> {
   try {
     await mkdir(dir, { recursive: true });
     await writeFile(path, launchAgentContent(), 'utf-8');
-    formatSuccess('Auto-update enabled (daily git pull)');
+    formatSuccess('Auto-update enabled (daily npm update)');
     console.log(`  LaunchAgent file: ${path}`);
     console.log('  To activate now: launchctl load -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist');
     return 0;

@@ -33,24 +33,6 @@ It supports two integration modes:
 
 ## Quick Start
 
-### Option 0: GitHub-based install (no npm dependency)
-
-This mode installs and manages the plugin directly from GitHub.
-
-```bash
-git clone https://github.com/welico/agent-speech-opencode.git
-cd agent-speech-opencode
-./scripts/install-from-github.sh
-```
-
-For updates in this mode:
-
-```bash
-./scripts/update-from-github.sh
-```
-
-Restart OpenCode after installation or update.
-
 ### Install directly in OpenCode CLI (recommended)
 
 ```bash
@@ -69,9 +51,11 @@ Add the following to `~/.config/opencode/opencode.json`:
 
 Restart OpenCode. Speech output starts from the next assistant response.
 
-### Option A: Plugin from npm
+### Plugin configuration (required)
 
-Add this to `~/.config/opencode/opencode.json` or project `opencode.json`:
+Your `~/.config/opencode/opencode.json` should contain only the npm plugin name:
+
+No repository clone is required for normal users.
 
 ```json
 {
@@ -88,7 +72,7 @@ npm install -g agent-speech-opencode
 
 Restart OpenCode. Responses should now be spoken automatically.
 
-### Option B: Local plugin file
+### Option A: Local plugin file
 
 Install globally and create a plugin entry file:
 
@@ -107,7 +91,7 @@ export default AgentSpeechPlugin;
 
 Restart OpenCode. Responses should now be spoken automatically.
 
-### Option C: MCP server mode
+### Option B: MCP server mode
 
 Add this to your `opencode.jsonc`:
 
@@ -270,13 +254,6 @@ By default, yes. Globally installed npm packages do not auto-update on their own
 npm install -g agent-speech-opencode@latest
 ```
 
-If you installed from GitHub (no npm), use:
-
-```bash
-cd ~/.config/opencode/plugins/agent-speech-opencode
-./scripts/update-from-github.sh
-```
-
 ### Optional automatic updates
 
 Enable daily background updates on macOS:
@@ -286,7 +263,7 @@ agent-speech enable-auto-update
 launchctl load -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist
 ```
 
-Note: auto-update uses daily `git pull` from `~/.config/opencode/plugins/agent-speech-opencode`.
+Note: auto-update runs daily `npm install -g agent-speech-opencode@latest`.
 
 Disable automatic updates:
 
