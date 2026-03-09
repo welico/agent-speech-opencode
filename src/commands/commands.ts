@@ -1,5 +1,8 @@
 import { ConfigManager } from '../core/config.js';
 import { formatSuccess, formatError } from '../utils/format.js';
+import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 
 const SUPPORTED_LANGUAGES = new Set([
   'auto',
@@ -156,6 +159,71 @@ export async function cmdListVoices(): Promise<number> {
   return 0;
 }
 
+function launchAgentPath(): string {
+  return join(homedir(), 'Library', 'LaunchAgents', 'com.welico.agent-speech.update.plist');
+}
+
+function launchAgentContent(): string {
+  const repoPath = join(homedir(), '.config', 'opencode', 'plugins', 'agent-speech-opencode');
+  const escapedRepoPath = repoPath.replace(/"/g, '\\"');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.welico.agent-speech.update</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-lc</string>
+    <string>if [ -d "${escapedRepoPath}/.git" ]; then git -C "${escapedRepoPath}" pull --ff-only; fi</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>86400</integer>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+`;
+}
+
+export async function cmdEnableAutoUpdate(): Promise<number> {
+  const path = launchAgentPath();
+  const dir = join(homedir(), 'Library', 'LaunchAgents');
+
+  try {
+    await mkdir(dir, { recursive: true });
+    await writeFile(path, launchAgentContent(), 'utf-8');
+    formatSuccess('Auto-update enabled (daily git pull)');
+    console.log(`  LaunchAgent file: ${path}`);
+    console.log('  To activate now: launchctl load -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist');
+    return 0;
+  } catch (error) {
+    formatError('Failed to enable auto-update', error);
+    return 1;
+  }
+}
+
+export async function cmdDisableAutoUpdate(): Promise<number> {
+  const path = launchAgentPath();
+
+  try {
+    await unlink(path);
+    formatSuccess('Auto-update disabled');
+    console.log('  To unload now: launchctl unload -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist');
+    return 0;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') {
+      formatSuccess('Auto-update was already disabled');
+      return 0;
+    }
+    formatError('Failed to disable auto-update', error);
+    return 1;
+  }
+}
+
 export function cmdHelp(): number {
   console.log(`
 agent-speech — OpenCode TTS plugin CLI
@@ -172,6 +240,8 @@ Commands:
   set-volume <0-100> Set volume
   set-language <code> Set spoken language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
   list-voices       List available voices
+  enable-auto-update  Enable daily auto-update via launchd
+  disable-auto-update Disable daily auto-update via launchd
   help              Show this help
   `.trim());
   return 0;

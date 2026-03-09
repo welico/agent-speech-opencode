@@ -11,6 +11,8 @@ import {
   cmdSetVolume,
   cmdSetLanguage,
   cmdListVoices,
+  cmdEnableAutoUpdate,
+  cmdDisableAutoUpdate,
   cmdHelp,
 } from './commands/index.js';
 import { formatError } from './utils/format.js';
@@ -34,6 +36,8 @@ async function main(): Promise<number> {
     case 'set-volume': return cmdSetVolume(rest[0]);
     case 'set-language': return cmdSetLanguage(rest[0]);
     case 'list-voices': return cmdListVoices();
+    case 'enable-auto-update': return cmdEnableAutoUpdate();
+    case 'disable-auto-update': return cmdDisableAutoUpdate();
     case 'help':
     case '--help':
     case '-h': return cmdHelp();

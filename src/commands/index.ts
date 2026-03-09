@@ -10,5 +10,7 @@ export {
   cmdSetVolume,
   cmdSetLanguage,
   cmdListVoices,
+  cmdEnableAutoUpdate,
+  cmdDisableAutoUpdate,
   cmdHelp,
 } from './commands.js';
