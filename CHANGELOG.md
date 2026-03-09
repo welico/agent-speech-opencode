@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.5 - 2026-03-09
+
+- Restore npm-only plugin management so users keep `plugin: ["agent-speech-opencode"]` without local clone scripts.
+- Update auto-update command to run daily npm global upgrade instead of git pull.
+- Adopt `@opencode-ai/plugin` type signatures for stronger plugin typing compatibility.
+
 ## v0.2.4 - 2026-03-09
 
 - Add GitHub-first installation and update scripts for npm-free plugin management.
