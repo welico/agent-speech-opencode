@@ -1,10 +1,10 @@
 import { TTSConfig, FilterResult } from '../types/index.js';
 
 const SENSITIVE_PATTERNS = [
-  /(?:api[_-]?key|apikey|api-key)['":\s]*([a-zA-Z0-9_\-]{20,})/gi,
+  /(?:api[_-]?key|apikey|api-key)['":\s]*([a-zA-Z0-9_-]{20,})/gi,
   /(?:password|passwd|pwd)['":\s]*([^\s,;]{6,})/gi,
-  /(?:token|bearer|auth)['":\s]*([a-zA-Z0-9._\-]{20,})/gi,
-  /(?:secret|private[_-]?key|privatekey)['":\s]*([a-zA-Z0-9_\-]{20,})/gi,
+  /(?:token|bearer|auth)['":\s]*([a-zA-Z0-9._-]{20,})/gi,
+  /(?:secret|private[_-]?key|privatekey)['":\s]*([a-zA-Z0-9_-]{20,})/gi,
   /AKIA[0-9A-Z]{16}/g,
   /(?:["']?)([A-Za-z0-9+/]{40,}={0,2})(?:["']?\s*(?:,|\)|}))/g,
 ];
@@ -13,11 +13,11 @@ const CODE_BLOCK_PATTERNS = [
   /```[\s\S]*?```/g,
   /`[^`]+`/g,
   /\$[^$]+$/g,
-  /^[\s]*[>\$].+$/gm,
+  /^[\s]*[>$].+$/gm,
 ];
 
 const COMMAND_OUTPUT_PATTERNS = [
-  /^[+\-]{3,}$/gm,
+  /^[+-]{3,}$/gm,
   /^\s*(BUILD|FAILED|SUCCESS|INFO|DEBUG|WARN|ERROR)\b/gm,
 ];
 
@@ -28,21 +28,41 @@ const SUMMARY_KEYWORDS = [
   /^(now |the (file|code|function|class|test|build|type))/i,
 ];
 
+const DECISION_PATTERNS: RegExp[] = [
+  // Question mark at end of sentence or paragraph
+  /\?(?:\s|$)/,
+
+  // English: explicit requests for user input
+  /\blet me know\b/i,
+  /\bplease\s+(?:choose|select|decide|confirm|specify)\b/i,
+  /\b(?:should I|shall I|would you like|do you (?:want|prefer)|would you prefer)\b/i,
+  /\b(?:which (?:one|option|approach|method|way))\b/i,
+  /\b(?:what would you (?:like|prefer))\b/i,
+  /\b(?:how (?:should I|would you like to))\b/i,
+
+  // Korean: question/decision patterns
+  /(?:할|될|갈)까요/,
+  /(?:해|알려)\s*주세요/,
+  /(?:선택|결정|어떻게|어떤|하시겠|원하시|괜찮으시)/,
+];
+
 export class ContentFilter {
+  extractDecision(text: string): string {
+    const paragraphs = this.stripMarkdown(text);
+    if (paragraphs.length === 0) return '';
+
+    const tail = paragraphs.slice(-3);
+    const decisionParagraph = [...tail]
+      .reverse()
+      .find((p) => DECISION_PATTERNS.some((re) => re.test(p)));
+
+    if (!decisionParagraph) return '';
+
+    return this.trimToSentence(decisionParagraph, 200);
+  }
+
   summarize(text: string): string {
-    let clean = text.replace(/```[\s\S]*?```/g, '').replace(/`[^`]+`/g, '');
-    clean = clean.replace(/^#{1,6}\s+/gm, '');
-    clean = clean.replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1');
-    clean = clean.replace(/_{1,2}([^_]+)_{1,2}/g, '$1');
-    clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-    clean = clean.replace(/^[\s]*[-*+]\s+/gm, '');
-    clean = clean.replace(/^\s*\d+\.\s+/gm, '');
-
-    const paragraphs = clean
-      .split(/\n{2,}/)
-      .map((p) => p.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim())
-      .filter((p) => p.length > 10);
-
+    const paragraphs = this.stripMarkdown(text);
     if (paragraphs.length === 0) return '';
 
     const conclusion = paragraphs.find((p) =>
@@ -52,6 +72,21 @@ export class ContentFilter {
     const candidate = conclusion ?? paragraphs[paragraphs.length - 1];
 
     return this.trimToSentence(candidate, 200);
+  }
+
+  private stripMarkdown(text: string): string[] {
+    let clean = text.replace(/```[\s\S]*?```/g, '').replace(/`[^`]+`/g, '');
+    clean = clean.replace(/^#{1,6}\s+/gm, '');
+    clean = clean.replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1');
+    clean = clean.replace(/_{1,2}([^_]+)_{1,2}/g, '$1');
+    clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    clean = clean.replace(/^[\s]*[-*+]\s+/gm, '');
+    clean = clean.replace(/^\s*\d+\.\s+/gm, '');
+
+    return clean
+      .split(/\n{2,}/)
+      .map((p) => p.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim())
+      .filter((p) => p.length > 10);
   }
 
   private trimToSentence(text: string, maxLen: number): string {
@@ -149,9 +184,9 @@ export class ContentFilter {
   private filterSensitive(text: string): string {
     let result = text;
     for (const pattern of SENSITIVE_PATTERNS) {
-      result = result.replace(pattern, (_match, _group1) => '[REDACTED]');
+      result = result.replace(pattern, () => '[REDACTED]');
     }
-    result = result.replace(/^export\s+\w+\s*=\s*['"][\w\-]+['"]/gm, 'export $1 = "[REDACTED]"');
+    result = result.replace(/^export\s+\w+\s*=\s*['"][\w-]+['"]/gm, 'export $1 = "[REDACTED]"');
     return result;
   }
 

@@ -109,20 +109,20 @@ export const AgentSpeechPlugin = async ({ client }: PluginContext) => {
 
         if (!text) return;
 
-        const summary = filter.summarize(text);
-        if (!summary) return;
+        const decision = filter.extractDecision(text);
+        if (!decision) return;
 
         const languageFromConfig = cfg.language?.trim();
         const targetLanguage = languageFromConfig && languageFromConfig !== 'auto'
           ? languageFromConfig
           : detectLanguageFromText(extractMessageText(lastUser));
 
-        const spokenText = await translateText(summary, targetLanguage);
+        const spokenText = await translateText(decision, targetLanguage);
         if (!spokenText) return;
 
-        logger.debug('Speaking summarized assistant message', {
+        logger.debug('Speaking decision-required message', {
           original: text.length,
-          summary: summary.length,
+          decision: decision.length,
           language: targetLanguage,
         });
 

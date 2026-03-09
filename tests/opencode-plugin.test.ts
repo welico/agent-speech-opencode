@@ -55,10 +55,10 @@ describe('AgentSpeechPlugin', () => {
     vi.unstubAllGlobals();
   });
 
-  it('speaks the latest assistant message on session.idle event', async () => {
+  it('speaks when assistant message requires user decision', async () => {
     const messages = [
       { info: { role: 'user' }, parts: [{ type: 'text', text: 'hello' }] },
-      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'latest response' }] },
+      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'I found two approaches. Should I proceed with option A or option B?' }] },
     ];
 
     const client = {
@@ -78,16 +78,40 @@ describe('AgentSpeechPlugin', () => {
     expect(client.session.messages).toHaveBeenCalledWith({ path: { id: 'session-1' } });
     expect(mockSpeak).toHaveBeenCalledTimes(1);
     expect(mockSpeak).toHaveBeenCalledWith(
-      'latest response',
+      expect.stringContaining('Should I proceed'),
       expect.objectContaining({ voice: 'Samantha', rate: 200, volume: 50 })
     );
+  });
+
+  it('does NOT speak status-only messages without user decision', async () => {
+    const messages = [
+      { info: { role: 'user' }, parts: [{ type: 'text', text: 'fix the bug' }] },
+      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'Done. The bug has been fixed and all tests pass.' }] },
+    ];
+
+    const client = {
+      session: {
+        messages: vi.fn().mockResolvedValue({ data: messages }),
+      },
+    };
+
+    const plugin = await AgentSpeechPlugin({ client });
+    await plugin.event?.({
+      event: {
+        type: 'session.idle',
+        properties: { sessionID: 'session-1' },
+      },
+    });
+
+    expect(client.session.messages).toHaveBeenCalledWith({ path: { id: 'session-1' } });
+    expect(mockSpeak).not.toHaveBeenCalled();
   });
 
   it('supports sessionId fallback property name', async () => {
     const client = {
       session: {
         messages: vi.fn().mockResolvedValue({
-          data: [{ role: 'assistant', parts: [{ type: 'text', text: 'fallback id' }] }],
+          data: [{ role: 'assistant', parts: [{ type: 'text', text: 'Would you like me to apply this change?' }] }],
         }),
       },
     };
@@ -122,16 +146,16 @@ describe('AgentSpeechPlugin', () => {
     expect(mockSpeak).not.toHaveBeenCalled();
   });
 
-  it('translates summary to detected user language before speaking', async () => {
+  it('translates decision text to detected user language before speaking', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => [[['최신 응답', 'latest response', null, null, 15]]],
+      json: async () => [[['이 변경 사항을 적용할까요?', 'Should I apply this change?', null, null, 15]]],
     });
     vi.stubGlobal('fetch', fetchMock);
 
     const messages = [
       { info: { role: 'user' }, parts: [{ type: 'text', text: '한국어로 말해줘' }] },
-      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'latest response' }] },
+      { info: { role: 'assistant' }, parts: [{ type: 'text', text: 'The fix is ready. Should I apply this change?' }] },
     ];
 
     const client = {
@@ -151,7 +175,7 @@ describe('AgentSpeechPlugin', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0][0])).toContain('tl=ko');
     expect(mockSpeak).toHaveBeenCalledWith(
-      '최신 응답',
+      '이 변경 사항을 적용할까요?',
       expect.objectContaining({ voice: 'Samantha', rate: 200, volume: 50 })
     );
   });

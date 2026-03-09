@@ -122,6 +122,95 @@ describe('ContentFilter', () => {
     });
   });
 
+  describe('extractDecision()', () => {
+    it('should return text ending with question mark', () => {
+      const text = 'I found two approaches.\n\nWhich approach would you prefer?';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('Which approach would you prefer?');
+    });
+
+    it('should detect "should I" decision pattern', () => {
+      const text = 'The file has a type error.\n\nShould I fix the type error now or skip it for later?';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('Should I fix');
+    });
+
+    it('should detect "would you like" decision pattern', () => {
+      const text = 'Changes are ready.\n\nWould you like me to commit these changes?';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('Would you like');
+    });
+
+    it('should detect "let me know" decision pattern', () => {
+      const text = 'I can use either Redis or Memcached for caching.\n\nLet me know which one to use.';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('Let me know');
+    });
+
+    it('should detect "which option" decision pattern', () => {
+      const text = 'Option A uses hooks, option B uses classes.\n\nWhich option fits your project better?';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('Which option');
+    });
+
+    it('should detect Korean question patterns', () => {
+      const text = '두 가지 방법이 있습니다.\n\n어떤 방법으로 진행할까요?';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('진행할까요');
+    });
+
+    it('should detect Korean decision keywords', () => {
+      const text = '설정 파일을 수정했습니다.\n\n다음 단계를 선택해 주세요.';
+      const result = filter.extractDecision(text);
+      expect(result).toContain('선택');
+    });
+
+    it('should return empty string for status updates (no question)', () => {
+      const text = 'Done. All changes have been applied successfully.';
+      expect(filter.extractDecision(text)).toBe('');
+    });
+
+    it('should return empty string for code explanations without questions', () => {
+      const text = 'The function uses a factory pattern.\n\nIt creates instances based on the input type.\n\nThis approach is more maintainable.';
+      expect(filter.extractDecision(text)).toBe('');
+    });
+
+    it('should return empty string for completion messages', () => {
+      const text = 'I updated the configuration file.\n\n```json\n{"key": "value"}\n```\n\nThe build passes now.';
+      expect(filter.extractDecision(text)).toBe('');
+    });
+
+    it('should strip code blocks before checking for decisions', () => {
+      const text = '```ts\nconst x = 1;\n```\n\nShould I add tests for this change?';
+      const result = filter.extractDecision(text);
+      expect(result).not.toContain('const x');
+      expect(result).toContain('Should I add tests');
+    });
+
+    it('should strip markdown formatting', () => {
+      const text = '## Options\n\n**Option A**: faster. **Option B**: safer.\n\nWhich one would you prefer?';
+      const result = filter.extractDecision(text);
+      expect(result).not.toContain('##');
+      expect(result).not.toContain('**');
+    });
+
+    it('should trim to 200 characters at a sentence boundary', () => {
+      const long = 'Should I proceed with ' + 'x'.repeat(200) + '?';
+      const result = filter.extractDecision(long);
+      expect(result.length).toBeLessThanOrEqual(200);
+    });
+
+    it('should return empty string for code-only text', () => {
+      const text = '```ts\nconst x = 1;\n```';
+      expect(filter.extractDecision(text)).toBe('');
+    });
+
+    it('should check only the last 3 paragraphs for decisions', () => {
+      const text = 'Is this relevant?\n\nParagraph two is here now.\n\nParagraph three continues.\n\nParagraph four is fine.\n\nDone. Everything is complete.';
+      expect(filter.extractDecision(text)).toBe('');
+    });
+  });
+
   describe('summarize()', () => {
     it('should return short text unchanged', () => {
       const text = 'Done. The file has been updated.';
