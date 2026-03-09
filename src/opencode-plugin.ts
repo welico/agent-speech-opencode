@@ -3,6 +3,7 @@ import { ConfigManager } from './core/config.js';
 import { ContentFilter } from './core/filter.js';
 import { translateText } from './utils/translate.js';
 import { createLogger } from './utils/logger.js';
+import type { Plugin, PluginInput } from '@opencode-ai/plugin';
 
 const logger = createLogger({ prefix: '[agent-speech]' });
 
@@ -35,24 +36,6 @@ function detectLanguageFromText(text: string): string {
   return 'en';
 }
 
-type OpenCodeClient = {
-  session: {
-    messages: (args: { path: { id: string } }) => Promise<unknown>;
-  };
-};
-
-type PluginContext = {
-  client: OpenCodeClient;
-};
-
-type SessionIdleEvent = {
-  type: string;
-  properties?: {
-    sessionID?: string;
-    sessionId?: string;
-  };
-};
-
 function extractMessages(result: unknown): SessionMessage[] {
   if (Array.isArray(result)) return result as SessionMessage[];
   if (!result || typeof result !== 'object') return [];
@@ -73,7 +56,7 @@ function extractMessages(result: unknown): SessionMessage[] {
   return [];
 }
 
-export const AgentSpeechPlugin = async ({ client }: PluginContext) => {
+export const AgentSpeechPlugin: Plugin = async ({ client }: PluginInput) => {
   const config = new ConfigManager();
   const tts = new TextToSpeech();
   const filter = new ContentFilter();
@@ -82,10 +65,13 @@ export const AgentSpeechPlugin = async ({ client }: PluginContext) => {
   logger.info('agent-speech-opencode plugin initialized');
 
   return {
-    event: async ({ event }: { event: SessionIdleEvent }) => {
+    event: async ({ event }: { event: { type: string; properties?: Record<string, unknown> } }) => {
       if (event.type !== 'session.idle') return;
 
-      const sessionID = event.properties?.sessionID ?? event.properties?.sessionId;
+      const properties = event.properties ?? {};
+      const sessionID =
+        (typeof properties.sessionID === 'string' ? properties.sessionID : undefined) ??
+        (typeof properties.sessionId === 'string' ? properties.sessionId : undefined);
       if (!sessionID) return;
 
       const cfg = config.getAll();
