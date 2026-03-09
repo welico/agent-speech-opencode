@@ -176,5 +176,3 @@ Commands:
   `.trim());
   return 0;
 }
-
-;
