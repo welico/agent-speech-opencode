@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4 - 2026-03-09
+
+- Add GitHub-first installation and update scripts for npm-free plugin management.
+- Add CLI commands to enable/disable daily git-based auto-update via macOS launchd.
+- Update README to fully English content and document npm-free update/management flows.
+
 ## v0.2.3 - 2026-03-09
 
 - Speak only when assistant output requires a user decision, skipping routine status updates.
