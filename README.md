@@ -33,14 +33,32 @@ It supports two integration modes:
 
 ## Quick Start
 
-### OpenCode CLI에서 바로 설치 (권장)
+### Option 0: GitHub-based install (no npm dependency)
+
+This mode installs and manages the plugin directly from GitHub.
+
+```bash
+git clone https://github.com/welico/agent-speech-opencode.git
+cd agent-speech-opencode
+./scripts/install-from-github.sh
+```
+
+For updates in this mode:
+
+```bash
+./scripts/update-from-github.sh
+```
+
+Restart OpenCode after installation or update.
+
+### Install directly in OpenCode CLI (recommended)
 
 ```bash
 npm install -g agent-speech-opencode
 mkdir -p ~/.config/opencode
 ```
 
-`~/.config/opencode/opencode.json`에 아래를 추가하세요.
+Add the following to `~/.config/opencode/opencode.json`:
 
 ```json
 {
@@ -49,7 +67,7 @@ mkdir -p ~/.config/opencode
 }
 ```
 
-OpenCode를 재시작하면 다음 응답부터 자동 음성 출력이 시작됩니다.
+Restart OpenCode. Speech output starts from the next assistant response.
 
 ### Option A: Plugin from npm
 
@@ -188,13 +206,13 @@ Config file location: `~/.agent-speech/config.json`
 
 ## Usage
 
-### 기본 사용 흐름
+### Basic usage flow
 
-1. OpenCode를 실행합니다.
-2. 응답이 완료되면(`session.idle`) 플러그인이 자동으로 마지막 assistant 텍스트를 읽습니다.
-3. 필요하면 `agent-speech set-voice Alex` 등으로 음성/속도를 조정합니다.
+1. Start OpenCode.
+2. When a response finishes (`session.idle`), the plugin automatically reads the latest assistant text.
+3. If needed, tune voice and speed with commands such as `agent-speech set-voice Alex`.
 
-### 빠른 점검
+### Quick checks
 
 ```bash
 agent-speech status
@@ -229,11 +247,53 @@ agent-speech reset                # Reset config to defaults
 agent-speech set-voice <name>     # Set macOS voice
 agent-speech set-rate <wpm>       # Set rate (50-400)
 agent-speech set-volume <0-100>   # Set volume (0-100)
+agent-speech set-language <code>  # Set language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
 agent-speech list-voices          # List installed macOS voices
+agent-speech enable-auto-update   # Enable daily auto-update via launchd
+agent-speech disable-auto-update  # Disable daily auto-update via launchd
 agent-speech help                 # Show help
 ```
 
 Popular voices include `Samantha`, `Alex`, `Victoria`, `Daniel`, `Fiona`, and `Tessa`.
+
+---
+
+## Updates
+
+### Do users need to update manually?
+
+By default, yes. Globally installed npm packages do not auto-update on their own.
+
+### Manual update
+
+```bash
+npm install -g agent-speech-opencode@latest
+```
+
+If you installed from GitHub (no npm), use:
+
+```bash
+cd ~/.config/opencode/plugins/agent-speech-opencode
+./scripts/update-from-github.sh
+```
+
+### Optional automatic updates
+
+Enable daily background updates on macOS:
+
+```bash
+agent-speech enable-auto-update
+launchctl load -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist
+```
+
+Note: auto-update uses daily `git pull` from `~/.config/opencode/plugins/agent-speech-opencode`.
+
+Disable automatic updates:
+
+```bash
+agent-speech disable-auto-update
+launchctl unload -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist
+```
 
 ---
 
