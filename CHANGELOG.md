@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.6 - 2026-03-11
+
+- Publish package under `@welico/agent-speech-opencode` scope for organization-based distribution.
+- Add CLI version checks: `agent-speech --version`, `agent-speech -v`, and `agent-speech version`.
+- Update installation and auto-update instructions to scoped npm package commands.
+
 ## v0.2.5 - 2026-03-09
 
 - Restore npm-only plugin management so users keep `plugin: ["agent-speech-opencode"]` without local clone scripts.
