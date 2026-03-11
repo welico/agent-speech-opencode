@@ -11,6 +11,7 @@ import {
   cmdSetVolume,
   cmdSetLanguage,
   cmdListVoices,
+  cmdVersion,
   cmdEnableAutoUpdate,
   cmdDisableAutoUpdate,
   cmdHelp,
@@ -36,6 +37,9 @@ async function main(): Promise<number> {
     case 'set-volume': return cmdSetVolume(rest[0]);
     case 'set-language': return cmdSetLanguage(rest[0]);
     case 'list-voices': return cmdListVoices();
+    case 'version':
+    case '--version':
+    case '-v': return cmdVersion();
     case 'enable-auto-update': return cmdEnableAutoUpdate();
     case 'disable-auto-update': return cmdDisableAutoUpdate();
     case 'help':

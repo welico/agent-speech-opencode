@@ -1,6 +1,6 @@
 # OpenCode Plugin Package Guide (Official Model + This Repository)
 
-This document explains how OpenCode officially loads plugins and how to package or install `agent-speech-opencode` accordingly.
+This document explains how OpenCode officially loads plugins and how to package or install `@welico/agent-speech-opencode` accordingly.
 
 Source of truth: `https://opencode.ai/docs/plugins/`.
 
@@ -38,7 +38,7 @@ Add package names to the `plugin` array in `opencode.json` or `opencode.jsonc`:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "agent-speech-opencode",
+    "@welico/agent-speech-opencode",
     "@my-org/custom-plugin"
   ]
 }
@@ -89,21 +89,21 @@ OpenCode load order is:
 3. `~/.config/opencode/plugins/` (global plugin directory)
 4. `.opencode/plugins/` (project plugin directory)
 
-## Applying the Official Model to agent-speech-opencode
+## Applying the Official Model to @welico/agent-speech-opencode
 
 This repository exports `AgentSpeechPlugin` and can be consumed in practical OpenCode setups.
 
 ### Recommended installation (local plugin file using npm package)
 
 ```bash
-npm install -g agent-speech-opencode
+npm install -g @welico/agent-speech-opencode
 mkdir -p ~/.config/opencode/plugins
 ```
 
 Create `~/.config/opencode/plugins/agent-speech.js`:
 
 ```js
-import { AgentSpeechPlugin } from "agent-speech-opencode"
+import { AgentSpeechPlugin } from "@welico/agent-speech-opencode"
 
 export default AgentSpeechPlugin
 ```

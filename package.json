@@ -1,5 +1,5 @@
 {
-  "name": "agent-speech-opencode",
+  "name": "@welico/agent-speech-opencode",
   "version": "0.2.5",
   "description": "OpenCode text-to-speech plugin using macOS native say command",
   "type": "module",

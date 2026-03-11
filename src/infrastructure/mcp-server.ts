@@ -20,7 +20,7 @@ export class MCPServer {
 
   constructor() {
     this.server = new Server(
-      { name: 'agent-speech-opencode', version: '0.1.0' },
+      { name: '@welico/agent-speech-opencode', version: '0.2.5' },
       { capabilities: { tools: {} } }
     );
     this.tts = new TextToSpeech();

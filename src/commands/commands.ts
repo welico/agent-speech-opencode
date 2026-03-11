@@ -1,6 +1,6 @@
 import { ConfigManager } from '../core/config.js';
 import { formatSuccess, formatError } from '../utils/format.js';
-import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import { mkdir, writeFile, unlink, readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -159,6 +159,21 @@ export async function cmdListVoices(): Promise<number> {
   return 0;
 }
 
+export async function cmdVersion(): Promise<number> {
+  try {
+    const packagePath = new URL('../../package.json', import.meta.url);
+    const raw = await readFile(packagePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { version?: string; name?: string };
+    const name = parsed.name ?? '@welico/agent-speech-opencode';
+    const version = parsed.version ?? 'unknown';
+    console.log(`${name} ${version}`);
+    return 0;
+  } catch (error) {
+    formatError('Failed to read package version', error);
+    return 1;
+  }
+}
+
 function launchAgentPath(): string {
   return join(homedir(), 'Library', 'LaunchAgents', 'com.welico.agent-speech.update.plist');
 }
@@ -174,7 +189,7 @@ function launchAgentContent(): string {
   <array>
     <string>/bin/sh</string>
     <string>-lc</string>
-    <string>npm install -g agent-speech-opencode@latest</string>
+    <string>npm install -g @welico/agent-speech-opencode@latest</string>
   </array>
   <key>StartInterval</key>
   <integer>86400</integer>
@@ -237,6 +252,7 @@ Commands:
   set-volume <0-100> Set volume
   set-language <code> Set spoken language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
   list-voices       List available voices
+  version           Show installed package version
   enable-auto-update  Enable daily auto-update via launchd
   disable-auto-update Disable daily auto-update via launchd
   help              Show this help

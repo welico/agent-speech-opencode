@@ -1,9 +1,9 @@
-# agent-speech-opencode
+# @welico/agent-speech-opencode
 
 > **Text-to-speech plugin for OpenCode** — reads AI responses using the native macOS `say` command.
 
-[![npm version](https://img.shields.io/npm/v/agent-speech-opencode?color=2f81f7&label=npm)](https://www.npmjs.com/package/agent-speech-opencode)
-[![npm downloads](https://img.shields.io/npm/dm/agent-speech-opencode?color=2ea043&label=downloads)](https://www.npmjs.com/package/agent-speech-opencode)
+[![npm version](https://img.shields.io/npm/v/%40welico%2Fagent-speech-opencode?color=2f81f7&label=npm)](https://www.npmjs.com/package/@welico/agent-speech-opencode)
+[![npm downloads](https://img.shields.io/npm/dm/%40welico%2Fagent-speech-opencode?color=2ea043&label=downloads)](https://www.npmjs.com/package/@welico/agent-speech-opencode)
 [![GitHub release](https://img.shields.io/github/v/release/welico/agent-speech-opencode?color=2f81f7&label=release)](https://github.com/welico/agent-speech-opencode/releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/welico/agent-speech-opencode?color=57606a)](https://github.com/welico/agent-speech-opencode/commits/main)
 [![Node >=18](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org)
@@ -20,7 +20,7 @@ For the official OpenCode plugin model and packaging flow, see `docs/opencode-pl
 
 ## Overview
 
-`agent-speech-opencode` adds text-to-speech to OpenCode so assistant responses can be spoken automatically.
+`@welico/agent-speech-opencode` adds text-to-speech to OpenCode so assistant responses can be spoken automatically.
 
 It supports two integration modes:
 
@@ -36,7 +36,7 @@ It supports two integration modes:
 ### Install directly in OpenCode CLI (recommended)
 
 ```bash
-npm install -g agent-speech-opencode
+npm install -g @welico/agent-speech-opencode
 mkdir -p ~/.config/opencode
 ```
 
@@ -45,7 +45,7 @@ Add the following to `~/.config/opencode/opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["agent-speech-opencode"]
+  "plugin": ["@welico/agent-speech-opencode"]
 }
 ```
 
@@ -60,14 +60,14 @@ No repository clone is required for normal users.
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["agent-speech-opencode"]
+  "plugin": ["@welico/agent-speech-opencode"]
 }
 ```
 
 Install:
 
 ```bash
-npm install -g agent-speech-opencode
+npm install -g @welico/agent-speech-opencode
 ```
 
 Restart OpenCode. Responses should now be spoken automatically.
@@ -77,14 +77,14 @@ Restart OpenCode. Responses should now be spoken automatically.
 Install globally and create a plugin entry file:
 
 ```bash
-npm install -g agent-speech-opencode
+npm install -g @welico/agent-speech-opencode
 mkdir -p ~/.config/opencode/plugins
 ```
 
 Create `~/.config/opencode/plugins/agent-speech.js`:
 
 ```js
-import { AgentSpeechPlugin } from 'agent-speech-opencode';
+import { AgentSpeechPlugin } from '@welico/agent-speech-opencode';
 
 export default AgentSpeechPlugin;
 ```
@@ -101,7 +101,7 @@ Add this to your `opencode.jsonc`:
   "mcp": {
     "agent-speech": {
       "type": "local",
-      "command": ["node", "/ABSOLUTE/PATH/TO/agent-speech-opencode/dist/mcp-server.js"],
+"command": ["node", "/ABSOLUTE/PATH/TO/agent-speech-opencode/dist/mcp-server.js"],
       "enabled": true
     }
   }
@@ -125,7 +125,7 @@ Then trigger it in a prompt, for example: `Say "Hello world"`.
 ### Install in OpenCode CLI terminal
 
 ```bash
-npm install -g agent-speech-opencode
+npm install -g @welico/agent-speech-opencode
 agent-speech init
 agent-speech status
 ```
@@ -133,7 +133,7 @@ agent-speech status
 ### Upgrade
 
 ```bash
-npm install -g agent-speech-opencode@latest
+npm install -g @welico/agent-speech-opencode@latest
 ```
 
 ### Install from source
@@ -233,6 +233,8 @@ agent-speech set-rate <wpm>       # Set rate (50-400)
 agent-speech set-volume <0-100>   # Set volume (0-100)
 agent-speech set-language <code>  # Set language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
 agent-speech list-voices          # List installed macOS voices
+agent-speech --version            # Print installed package version
+agent-speech -v                   # Short alias for --version
 agent-speech enable-auto-update   # Enable daily auto-update via launchd
 agent-speech disable-auto-update  # Disable daily auto-update via launchd
 agent-speech help                 # Show help
@@ -251,7 +253,14 @@ By default, yes. Globally installed npm packages do not auto-update on their own
 ### Manual update
 
 ```bash
-npm install -g agent-speech-opencode@latest
+npm install -g @welico/agent-speech-opencode@latest
+```
+
+### Verify update
+
+```bash
+agent-speech --version
+agent-speech -v
 ```
 
 ### Optional automatic updates
@@ -263,7 +272,7 @@ agent-speech enable-auto-update
 launchctl load -w ~/Library/LaunchAgents/com.welico.agent-speech.update.plist
 ```
 
-Note: auto-update runs daily `npm install -g agent-speech-opencode@latest`.
+Note: auto-update runs daily `npm install -g @welico/agent-speech-opencode@latest`.
 
 Disable automatic updates:
 
@@ -347,7 +356,7 @@ tail -f /tmp/agent-speech-debug.log
 
 - The plugin now handles `session.idle` through the OpenCode `event` hook model.
 - Session lookup uses OpenCode SDK-style `client.session.messages({ path: { id } })`.
-- npm installation auto-loads through the `plugin` array with `agent-speech-opencode`.
+- npm installation auto-loads through the `plugin` array with `@welico/agent-speech-opencode`.
 
 ---
 
