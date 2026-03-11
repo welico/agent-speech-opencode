@@ -85,9 +85,6 @@ export class SayCommand {
 
     if (config.voice) args.push('-v', config.voice);
     if (config.rate && config.rate !== 200) args.push('-r', config.rate.toString());
-    if (config.volume !== undefined && config.volume !== 50) {
-      args.push('-a', (config.volume / 100).toString());
-    }
 
     args.push(text);
     return args;

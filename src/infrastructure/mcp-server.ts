@@ -96,7 +96,7 @@ export class MCPServer {
         filters: cfg.filters,
       };
 
-      this.tts.speak(input.text, speakConfig);
+      await this.tts.speak(input.text, speakConfig);
 
       return {
         content: [
