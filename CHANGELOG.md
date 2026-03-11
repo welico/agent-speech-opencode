@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.7 - 2026-03-11
+
+- Fix speech playback reliability by awaiting MCP `speak_text` execution before returning success.
+- Remove invalid `say -a` volume argument usage that could cause silent playback failures.
+- Add `agent-speech speak <text...>` command for direct end-to-end local audio testing.
+
 ## v0.2.6 - 2026-03-11
 
 - Publish package under `@welico/agent-speech-opencode` scope for organization-based distribution.
