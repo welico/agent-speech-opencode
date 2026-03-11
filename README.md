@@ -233,6 +233,7 @@ agent-speech set-rate <wpm>       # Set rate (50-400)
 agent-speech set-volume <0-100>   # Set volume (0-100)
 agent-speech set-language <code>  # Set language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
 agent-speech list-voices          # List installed macOS voices
+agent-speech speak <text...>      # Speak text immediately for quick testing
 agent-speech --version            # Print installed package version
 agent-speech -v                   # Short alias for --version
 agent-speech enable-auto-update   # Enable daily auto-update via launchd

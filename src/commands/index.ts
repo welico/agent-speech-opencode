@@ -10,6 +10,7 @@ export {
   cmdSetVolume,
   cmdSetLanguage,
   cmdListVoices,
+  cmdSpeak,
   cmdVersion,
   cmdEnableAutoUpdate,
   cmdDisableAutoUpdate,

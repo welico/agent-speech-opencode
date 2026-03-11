@@ -159,6 +159,38 @@ export async function cmdListVoices(): Promise<number> {
   return 0;
 }
 
+export async function cmdSpeak(textArg: string[] | undefined): Promise<number> {
+  const text = (textArg ?? []).join(' ').trim();
+  if (!text) {
+    formatError('Text required. Example: agent-speech speak Hello from OpenCode');
+    return 1;
+  }
+
+  const config = new ConfigManager();
+  await config.init();
+  const cfg = config.getAll();
+
+  const { TextToSpeech } = await import('../core/tts.js');
+  const tts = new TextToSpeech();
+
+  try {
+    await tts.speak(text, {
+      enabled: cfg.enabled,
+      voice: cfg.voice,
+      rate: cfg.rate,
+      volume: cfg.volume,
+      minLength: cfg.minLength,
+      maxLength: cfg.maxLength,
+      filters: cfg.filters,
+    });
+    formatSuccess('Speech playback completed');
+    return 0;
+  } catch (error) {
+    formatError('Speech playback failed', error);
+    return 1;
+  }
+}
+
 export async function cmdVersion(): Promise<number> {
   try {
     const packagePath = new URL('../../package.json', import.meta.url);
@@ -252,6 +284,7 @@ Commands:
   set-volume <0-100> Set volume
   set-language <code> Set spoken language (auto, en, ko, ja, zh-CN, es, fr, de, it, ru)
   list-voices       List available voices
+  speak <text...>   Speak text immediately
   version           Show installed package version
   enable-auto-update  Enable daily auto-update via launchd
   disable-auto-update Disable daily auto-update via launchd
